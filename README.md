@@ -25,15 +25,39 @@ A simple web-based voting application built with Spring Boot that allows Trinity
 - **Database**: H2 In-Memory Database
 - **Frontend**: Vanilla HTML, CSS, and JavaScript
 - **Build Tool**: Maven
-- **Java Version**: 17+
+- **Java Version**: 17
+- **Containerization**: Docker
 
-## Prerequisites
+## Quick Start with Docker (Recommended)
 
-- Java 17 or higher
+The easiest way to run this application is with Docker - no need to install Java or Maven!
+
+### Prerequisites
+- Docker
+- Git
+
+### Run the Application
+```bash
+# Clone the repository
+git clone https://github.com/shamshertamang/my-spring-container.git
+cd my-spring-container
+
+# Build and run with Docker
+docker build -t voting-app .
+docker run -p 8080:8080 voting-app
+```
+
+### Access the Application
+Open your browser and navigate to: `http://localhost:8080`
+
+
+## Prerequisites (for developers)
+
+- Java 21
 - Maven 3.6+ (or use the included Maven wrapper)
 - Git
 
-## Setup Instructions
+## Manual Setup Instructions (for developers)
 
 ### 1. Clone the Repository
 
@@ -72,6 +96,48 @@ Open your web browser and navigate to:
 ```
 http://localhost:8080
 ```
+
+## Docker Support
+
+### Build the Docker Image
+```bash
+docker build -t voting-app .
+```
+
+### Run the Container
+```bash
+docker run -p 8080:8080 voting-app
+```
+
+### Run in Background (Detached Mode)
+```bash
+docker run -d -p 8080:8080 --name voting-container voting-app
+```
+
+### Container Management
+```bash
+# Stop the container
+docker stop voting-container
+
+# Start the stopped container
+docker start voting-container
+
+# View container logs
+docker logs voting-container
+
+# View logs in real-time
+docker logs -f voting-container
+
+# Remove the container
+docker rm voting-container
+
+# Remove the Docker image
+docker rmi voting-app
+```
+
+### Access the Dockerized Application
+Open your browser and navigate to: `http://localhost:8080`
+
 
 ## Usage
 
@@ -128,14 +194,8 @@ src/
 - The application uses an H2 in-memory database, so all data is reset when the application restarts
 - For production use, consider switching to a persistent database like PostgreSQL or MySQL
 - The application runs on port 8080 by default
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin feature/new-feature`)
-5. Create a Pull Request
+- **Docker**: The application can be containerised using the Dockerfile
+- **Java Version**: Build and tested with JDK21
 
 ## License
 
