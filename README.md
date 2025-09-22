@@ -38,8 +38,8 @@ A simple web-based voting application built with Spring Boot that allows Trinity
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-cd YOUR_REPO_NAME
+git clone https://github.com/shamshertamang/my-spring-container.git
+cd myspringcontainer
 ```
 
 ### 2. Build the Project
