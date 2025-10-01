@@ -157,9 +157,7 @@ src/
 ## Development Notes
 
 - The application uses an H2 in-memory database, so all data is reset when the application restarts
-- For production use, consider switching to a persistent database like PostgreSQL or MySQL
-- The application runs on port 8080 by default
-- **Docker**: The application can be containerised using the Dockerfile
+- The application runs on port 8080/swagger-ui by default
 - **Java Version**: Build and tested with JDK21
 
 ## License
