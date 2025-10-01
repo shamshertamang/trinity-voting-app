@@ -9,7 +9,7 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.javashams</groupId>
-	<artifactId>SpringContainer</artifactId>
+	<artifactId>spring-app</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SpringContainer</name>
 	<description>SpringContainer</description>

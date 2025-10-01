@@ -38,18 +38,20 @@ The easiest way to run this application is with Docker - no need to install Java
 
 ### Run the Application
 ```bash
-# Clone the repository
-git clone https://github.com/shamshertamang/my-spring-container.git
-cd my-spring-container
+   # Clone the repository
+   git clone https://github.com/shamshertamang/my-spring-container.git
+   cd my-spring-container
 
-# Build and run with Docker
-./mvnw spring-boot:build-image
-docker run --rm -p 8080:8080 my-spring-app:v1.0.0
+   # Build and run with Docker
+   ./mvnw spring-boot:build-image
+   docker run --rm -p 8080:8080 my-spring-app:v1.0.0
 ```
 
 ### Access the Application
-Open your browser and navigate to: `http://localhost:8080/swagger-ui`
-
+Open your browser and navigate to: 
+```bash
+   http://localhost:8080/swagger-ui
+```
 
 ## Prerequisites (for developers)
 
@@ -62,46 +64,47 @@ Open your browser and navigate to: `http://localhost:8080/swagger-ui`
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/shamshertamang/my-spring-container.git
-cd myspringcontainer
+   git clone https://github.com/shamshertamang/my-spring-container.git
+   cd myspringcontainer
 ```
 
 ### 2. Build the Project
 
 Using Maven wrapper (recommended):
 ```bash
-./mvnw clean compile
+   ./mvnw clean compile
 ```
 
 Or using system Maven:
 ```bash
-mvn clean compile
+   mvn clean compile
 ```
 
 ### 3. Run the Application
 
 Using Maven wrapper:
 ```bash
-./mvnw spring-boot:run
+   ./mvnw spring-boot:run
 ```
 
 Or using system Maven:
 ```bash
-mvn spring-boot:run
+   mvn spring-boot:run
 ```
 
-### 4. Access the Application
+### 4. Containerize the application
+```bash
+   ./mvnw spring-boot:build-image
+   docker run --rm -p 8080:8080 my-spring-app:v1.0.0
+```
+
+### 5. Access the Application
 
 Open your web browser and navigate to:
-```
-http://localhost:8080
+```bash
+   http://localhost:8080/swagger-ui
 ```
 
-### 5. Containerize the application
-```
-./mvnw spring-boot:build-image
-docker run --rm -p 8080:8080 my-spring-app:v1.0.0
-```
 
 ## Usage
 
