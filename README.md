@@ -4,7 +4,7 @@ A simple web-based voting application built with Spring Boot that allows Trinity
 
 ## Features
 
-- **Email Validation**: Only accepts votes from valid `@trincoll.edu` email addresses with strict format validation
+- **Email Validation**: Only accepts votes from valid `username@trincoll.edu` email addresses with strict format validation
 - **One Vote Per Person**: Prevents duplicate voting by tracking email addresses
 - **Dynamic Candidate Management**: Users can vote for existing candidates or add new ones
 - **Real-time Updates**: New candidates added by voters become available to subsequent voters
@@ -23,12 +23,12 @@ A simple web-based voting application built with Spring Boot that allows Trinity
 
 - **Backend**: Spring Boot 3.2.0
 - **Database**: H2 In-Memory Database
-- **Frontend**: Vanilla HTML, CSS, and JavaScript
+- **Frontend**: Swagger UI
 - **Build Tool**: Maven
-- **Java Version**: 17
+- **Java Version**: 21
 - **Containerization**: Docker
 
-## Quick Start with Docker (Recommended)
+## Quick Start with Docker
 
 The easiest way to run this application is with Docker - no need to install Java or Maven!
 
@@ -43,12 +43,12 @@ git clone https://github.com/shamshertamang/my-spring-container.git
 cd my-spring-container
 
 # Build and run with Docker
-docker build -t voting-app .
-docker run -p 8080:8080 voting-app
+./mvnw spring-boot:build-image
+docker run --rm -p 8080:8080 my-spring-app:v1.0.0
 ```
 
 ### Access the Application
-Open your browser and navigate to: `http://localhost:8080`
+Open your browser and navigate to: `http://localhost:8080/swagger-ui`
 
 
 ## Prerequisites (for developers)
@@ -57,7 +57,7 @@ Open your browser and navigate to: `http://localhost:8080`
 - Maven 3.6+ (or use the included Maven wrapper)
 - Git
 
-## Manual Setup Instructions (for developers)
+## Developer Setup Instructions
 
 ### 1. Clone the Repository
 
@@ -97,47 +97,11 @@ Open your web browser and navigate to:
 http://localhost:8080
 ```
 
-## Docker Support
-
-### Build the Docker Image
-```bash
-docker build -t voting-app .
+### 5. Containerize the application
 ```
-
-### Run the Container
-```bash
-docker run -p 8080:8080 voting-app
+./mvnw spring-boot:build-image
+docker run --rm -p 8080:8080 my-spring-app:v1.0.0
 ```
-
-### Run in Background (Detached Mode)
-```bash
-docker run -d -p 8080:8080 --name voting-container voting-app
-```
-
-### Container Management
-```bash
-# Stop the container
-docker stop voting-container
-
-# Start the stopped container
-docker start voting-container
-
-# View container logs
-docker logs voting-container
-
-# View logs in real-time
-docker logs -f voting-container
-
-# Remove the container
-docker rm voting-container
-
-# Remove the Docker image
-docker rmi voting-app
-```
-
-### Access the Dockerized Application
-Open your browser and navigate to: `http://localhost:8080`
-
 
 ## Usage
 
@@ -151,9 +115,7 @@ Open your browser and navigate to: `http://localhost:8080`
 ## Email Validation Rules
 
 The application enforces strict email validation:
-- Must end with `@trincoll.edu`
-- Must have exactly one dot (`.`) in the entire email address
-- No additional dots are allowed before the `@` symbol
+- Must use `username@trincoll.edu`
 
 **Valid Examples:**
 - `jsmith@trincoll.edu` ✅
@@ -180,7 +142,7 @@ src/
 │   │       ├── VoteRepository.java
 │   │       └── CandidateRepository.java
 │   └── resources/
-│       ├── static/index.html                   # Frontend interface
+│       ├── static/                             # Frontend interface
 │       └── application.properties              # Application configuration
 ```
 

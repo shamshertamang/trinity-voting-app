@@ -40,7 +40,7 @@ public class VotingService {
     public String submitVote(String voterEmail, String candidateName) {
         // Validate email
         if (!isValidTrinityEmail(voterEmail)) {
-            return "Invalid Trinity College email format.";
+            return "Invalid Trinity College email format. Please use username@trincoll.edu";
         }
 
         // Check if user has already voted

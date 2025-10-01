@@ -52,3 +52,5 @@ Thumbs.db
 # Spring Boot
 application-*.properties
 application-*.yml
+
+index.html
