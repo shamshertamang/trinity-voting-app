@@ -1,33 +1,32 @@
 package com.javashams.springcontainer.service;
 
-import com.javashams.springcontainer.model.Vote;
 import com.javashams.springcontainer.model.Candidate;
-import com.javashams.springcontainer.repository.VoteRepository;
+import com.javashams.springcontainer.model.Vote;
 import com.javashams.springcontainer.repository.CandidateRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.javashams.springcontainer.repository.VoteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
 public class VotingService {
 
-    @Autowired
-    private VoteRepository voteRepository;
+    private final VoteRepository voteRepository;
+    private final CandidateRepository candidateRepository;
 
-    @Autowired
-    private CandidateRepository candidateRepository;
+    public VotingService(VoteRepository voteRepository, CandidateRepository candidateRepository) {
+        this.voteRepository = voteRepository;
+        this.candidateRepository = candidateRepository;
+    }
 
-    // Email validation pattern for Trinity College emails
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^.]+@trincoll\\.edu$");
 
     public boolean isValidTrinityEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return false;
-        }
-        // Check if email matches pattern and has exactly one dot
+        if (email == null || email.trim().isEmpty()) return false;
         long dotCount = email.chars().filter(ch -> ch == '.').count();
         return EMAIL_PATTERN.matcher(email).matches() && dotCount == 1;
     }
@@ -38,47 +37,78 @@ public class VotingService {
 
     @Transactional
     public String submitVote(String voterEmail, String candidateName) {
-        // Validate email
-        if (!isValidTrinityEmail(voterEmail)) {
-            return "Invalid Trinity College email format. Please use username@trincoll.edu";
-        }
+        if (!isValidTrinityEmail(voterEmail)) return "Invalid Trinity College email format. Please use username@trincoll.edu";
+        if (hasAlreadyVoted(voterEmail)) return "You have already submitted a vote.";
+        if (candidateName == null || candidateName.trim().isEmpty()) return "Candidate name cannot be empty.";
 
-        // Check if user has already voted
-        if (hasAlreadyVoted(voterEmail)) {
-            return "You have already submitted a vote.";
-        }
+        Candidate candidate = candidateRepository.findByName(candidateName.trim());
+        if (candidate == null) candidate = candidateRepository.save(new Candidate(candidateName.trim()));
 
-        // Validate candidate name
-        if (candidateName == null || candidateName.trim().isEmpty()) {
-            return "Candidate name cannot be empty.";
-        }
+        candidate.incrementVoteCount();
+        candidateRepository.save(candidate);
 
-        candidateName = candidateName.trim();
-
-        try {
-            // Find or create candidate
-            Candidate candidate = candidateRepository.findByName(candidateName);
-            if (candidate == null) {
-                candidate = new Candidate(candidateName);
-                candidateRepository.save(candidate);
-            }
-
-            // Increment vote count
-            candidate.incrementVoteCount();
-            candidateRepository.save(candidate);
-
-            // Save the vote
-            Vote vote = new Vote(voterEmail, candidateName);
-            voteRepository.save(vote);
-
-            return "SUCCESS";
-
-        } catch (Exception e) {
-            return "Error processing vote: " + e.getMessage();
-        }
+        Vote vote = new Vote(voterEmail.trim(), candidate.getName());
+        voteRepository.save(vote);
+        return "SUCCESS";
     }
 
     public List<Candidate> getAllCandidates() {
         return candidateRepository.findAllByOrderByVoteCountDesc();
+    }
+
+    public List<Vote> getAllVotes() {
+        return voteRepository.findAll();
+    }
+
+    public Optional<Vote> getVoteByEmail(String voterEmail) {
+        return voteRepository.findByVoterEmail(voterEmail);
+    }
+
+    @Transactional
+    public String updateVote(String voterEmail, String newCandidateName) {
+        if (!isValidTrinityEmail(voterEmail)) return "Invalid Trinity College email format.";
+        if (newCandidateName == null || newCandidateName.trim().isEmpty()) return "Candidate name cannot be empty.";
+
+        Vote vote = voteRepository.findByVoterEmail(voterEmail)
+                .orElse(null);
+        if (vote == null) return "No existing vote found for this email.";
+
+        String oldCandidateName = vote.getCandidateName();
+        if (oldCandidateName.equalsIgnoreCase(newCandidateName.trim())) return "No change: candidate is the same.";
+
+        // decrement old
+        Candidate oldC = candidateRepository.findByName(oldCandidateName);
+        if (oldC != null && oldC.getVoteCount() > 0) {
+            oldC.setVoteCount(oldC.getVoteCount() - 1);
+            candidateRepository.save(oldC);
+        }
+
+        // increment new (create if needed)
+        Candidate newC = candidateRepository.findByName(newCandidateName.trim());
+        if (newC == null) newC = candidateRepository.save(new Candidate(newCandidateName.trim()));
+        newC.setVoteCount(newC.getVoteCount() + 1);
+        candidateRepository.save(newC);
+
+        // update vote
+        vote.setCandidateName(newC.getName());
+        vote.setVoteTime(LocalDateTime.now());
+        voteRepository.save(vote);
+
+        return "SUCCESS";
+    }
+
+    @Transactional
+    public String deleteVote(String voterEmail) {
+        if (!isValidTrinityEmail(voterEmail)) return "Invalid Trinity College email format.";
+        Vote vote = voteRepository.findByVoterEmail(voterEmail).orElse(null);
+        if (vote == null) return "No existing vote found for this email.";
+
+        Candidate c = candidateRepository.findByName(vote.getCandidateName());
+        if (c != null && c.getVoteCount() > 0) {
+            c.setVoteCount(c.getVoteCount() - 1);
+            candidateRepository.save(c);
+        }
+        voteRepository.delete(vote);
+        return "SUCCESS";
     }
 }
