@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: react
-          image: shamdocks/react-frontend:1.0.0
+          image: shamdocks/react-frontend:1.0.0  # <your-dockerhub-username>/react-frontend:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80

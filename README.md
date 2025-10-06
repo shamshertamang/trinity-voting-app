@@ -226,14 +226,3 @@ Place here as required:
     ├── kubectl-get-all.png         # shows 2 Deployments, 2 RS, 4 Pods, 2 Services
     └── working-ui.png              # React UI with visible URL and successful CRUD
 ```
-
-## Brief Summary (for the writeup)
-- Challenges & fixes (examples you can tailor):
-
-  - Struggled with docker build for react and nginx.conf
-  - Mixed service types → used NodePort for frontend; ClusterIP for backend, had a hard time figuring out how to avoid port forwarding
-  - React was a tough ride because this is my first react application
-  - Getting the rest api connection to react and back to spring was tough too.
-  - Spring boot folder misnaming caused the build error, which was hard to figure out at first
-
-- **Use of AI tools**: Guidance on Dockerfile, react docker build plus nginx conf, K8s YAML patterns, and figuring out port forwarding, also extensively used AI for frontend and spring boot.
