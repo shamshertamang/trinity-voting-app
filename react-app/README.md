@@ -1,16 +1,212 @@
-# React + Vite
+# Trinity College Voting App — React Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+---
 
-Currently, two official plugins are available:
+This directory contains the frontend microservice for the Trinity College Voting System, a secure and easy-to-use campus voting platform.
+The frontend is built with **React + Vite**, styled with plain CSS, and served in production via **NGINX** with proxy rules to the Spring Boot backend service.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Architecture Overview
 
-The React Compiler is not enabled on this template. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This microservice is part of a three-tier Kubernetes-deployed system:
 
-## Expanding the ESLint configuration
+| Layer | Technology                | Description |
+|-------|---------------------------|-------------|
+| Frontend | React + Vite (this repo)  | User interface for students to cast, update, and delete votes. Communicates with the backend over RESTful APIs. |
+| Backend | Spring Boot (Java)        | Handles candidate and vote persistence, validation, and API endpoints. |
+| Database | H2 | Stores candidates and votes. |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+All components are containerized and deployed as independent Kubernetes pods. The frontend communicates with the backend via the ```spring-service``` Kubernetes service name (DNS).
+
+---
+
+## Features
+
+- **Email validation** — ensures only ```username@trincoll.edu``` emails can vote.
+
+- **Vote management** — submit, update, or delete a vote tied to an email.
+
+- **Live results** — dynamically fetch and render current vote counts.
+
+- **Auto-detection** — detects if a user has already voted and displays editing/deletion options.
+
+- **Automatic reloads** — results refresh after any submission or deletion.
+
+- **Microservice isolation** — communicates via REST API proxied through NGINX to the backend.
+
+---
+
+## Local Development
+
+1) Prerequisites
+
+- Node.js 20+
+
+- npm or yarn
+
+- Backend service running locally (Spring Boot) — default on port **8080**
+
+2) Installation
+```bash
+  # Install dependencies
+  npm ci
+```
+
+3) Start the development server
+
+The frontend runs locally on Vite and proxies /api/* calls to your backend:
+
+```bash
+  npm run dev
+```
+
+Access it at:
+```bash
+  http://localhost:5173
+```
+
+4) Configure backend target
+
+The proxy target is set in **vite.config.js**:
+```bash
+  const BACKEND = process.env.BACKEND || 'http://localhost:8080';
+```
+
+---
+
+## API Integration
+
+The frontend consumes the following backend REST APIs:
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/api/candidates` | Fetch list of all candidates |
+| POST | `/api/vote` | Submit a new vote |
+| PUT | `/api/vote` | Update existing vote |
+| DELETE | `/api/vote/{email}` | Delete vote by email |
+| GET | `/api/results` | Fetch current vote counts |
+| GET | `/api/votes/{email}` | Check if user already voted |
+
+All network logic is encapsulated in ```src/lib/api.js```.
+
+---
+
+🧮 Project Structure
+
+```
+react-app/
+├── src/
+│   ├── components/
+│   │   ├── CandidateForm.jsx     # Main voting form logic
+│   │   └── VoteResults.jsx       # Results list UI
+│   ├── lib/
+│   │   └── api.js                # REST API abstraction
+│   ├── App.jsx                   # Root component
+│   ├── main.jsx                  # Entry point
+│   ├── index.css                 # Global styles
+│   └── App.css                   # Component-specific styles
+├── nginx.conf                    # NGINX proxy config (used in container)
+├── Dockerfile                    # Multi-stage Docker build
+├── vite.config.js                # Vite dev/prod configuration
+├── package.json                  # Dependencies and scripts
+└── README.md                     # (this file)
+```
+
+---
+
+## Docker Build & Run
+
+The Dockerfile uses a **two-stage build** (Node build → NGINX serve):
+
+```
+# Build stage
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Serve stage
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+Build and run locally:
+```bash
+    # Build the Docker container
+    docker build -t <your-dockerhub-username>/react-frontend:1.0.0 .
+    
+    # Push to DockerHub
+    docker push <your-dockerhub-username>/react-frontend:1.0.0
+```
+
+Now visit 
+```bash
+  http://localhost:5173
+```
+to see the UI served through NGINX.
+
+---
+
+## Kubernetes Deployment
+
+When deployed to Kubernetes, the frontend runs as a pod served through a **ClusterIP service** (e.g., ```react-service```):
+
+```bash
+  kubectl get all
+```
+
+Example port-forward (for local access):
+```bash
+  kubectl port-forward svc/react-service 5173:80
+```
+
+This forwards your local ``` localhost:5173 ``` to the in-cluster port ```80``` of the React service.
+
+---
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_BASE_URL` | Optional override for backend API base URL | `''` (same origin / proxy) |
+| `BACKEND` | Used by Vite proxy in dev mode | `http://localhost:8080` |
+
+---
+
+## UI Components
+
+- **CandidateForm.jsx** — handles:
+  - email validation and vote submission 
+  - edit/delete existing votes 
+  - mode toggle between select and type 
+- **VoteResults.jsx** — handles:
+  - fetching current results 
+  - highlighting current leader(s)
+  - live refresh button
+
+---
+
+## Developer Notes
+
+- The SPA (single-page app) is built and served statically.
+
+- All API calls go through ```/api/*``` — proxied either by Vite (dev) or NGINX (prod).
+
+- Candidate list refreshes automatically after vote updates/deletions.
+
+- In production, NGINX proxies API traffic to ```spring-service:8080``` (internal K8s DNS).
+
+---
+
+## License
+
+MIT © 2025 Trinity College Voting System Team.
+For internal academic and demonstration use only.
+
+---
