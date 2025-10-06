@@ -16,21 +16,24 @@ spec:
     spec:
       containers:
         - name: spring
-          image: my-spring-app:v1.0.0
+          image: shamdocks/trinity-spring:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
-          # If you don't have Actuator, probe an existing endpoint:
           readinessProbe:
             httpGet:
               path: /api/candidates
               port: 8080
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+
           livenessProbe:
             httpGet:
               path: /api/candidates
               port: 8080
-            initialDelaySeconds: 15
+            initialDelaySeconds: 20
             periodSeconds: 10
-
+            timeoutSeconds: 2
+            failureThreshold: 3

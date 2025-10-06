@@ -5,13 +5,10 @@ metadata:
   labels:
     app: react
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: react
   ports:
     - name: http
-      port: 80
+      port: 5173
       targetPort: 80
-      # Pick a convenient NodePort (30000–32767) or omit for random
-      nodePort: 30080
-

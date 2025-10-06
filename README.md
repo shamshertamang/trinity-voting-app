@@ -18,6 +18,38 @@ trinity-voting-app/
 └── react-service.yaml
 ```
 
+## Quick Run
+
+```bash
+    # -1) setup keyboard shortcut
+    alias k=kubectl
+    
+    # 0) point k8s at docker desktop's cluster
+    k config get-contexts
+    kubectl config use-context docker-desktop 
+    k cluster-info
+    
+    # Step 1) deploy spring boot and react
+    kubectl apply -f kubernetes/spring-deployment.yaml
+    kubectl apply -f kubernetes/react-deployment.yaml
+    kubectl apply -f kubernetes/react-service.yaml   
+    kubectl apply -f kubernetes/spring-service.yaml
+    
+    # Step 2) verify deployments and services are running
+    kubectl get deployments      
+    kubectl get services       
+    
+    # Step 3) Open the app at 
+    http://localhost:5173
+    
+    # Step 4) Clean up
+    k delete -f kubernetes/react-service.yaml
+    k delete -f kubernetes/react-deployment.yaml
+    k delete -f kubernetes/spring-service.yaml
+    k delete -f kubernetes/spring-deployment.yaml
+
+```
+
 ## What You'll Deploy
 
 ### Spring microservice (2 replicas)

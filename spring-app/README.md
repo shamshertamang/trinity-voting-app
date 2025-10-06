@@ -1,165 +1,91 @@
-# Trinity College Voting Application
+# Trinity College Voting — Spring Backend Microservice
 
-A simple web-based voting application built with Spring Boot that allows Trinity College students and staff to vote for candidates using their institutional email addresses.
+This directory contains the **backend microservice** for the Trinity College Voting System. It exposes a REST API for managing candidates and votes. The React frontend (in `../react-app`) consumes these endpoints.
 
-## Features
+## Tech Stack
 
-- **Email Validation**: Only accepts votes from valid `username@trincoll.edu` email addresses with strict format validation
-- **One Vote Per Person**: Prevents duplicate voting by tracking email addresses
-- **Dynamic Candidate Management**: Users can vote for existing candidates or add new ones
-- **Real-time Updates**: New candidates added by voters become available to subsequent voters
-- **Simple Interface**: Clean, user-friendly web interface for easy voting
+- **Spring Boot** (Java 21)
+- **H2 in-memory DB** (dev/demo)
+- **Maven** build
+- **Docker** container
+- **Swagger UI** at `/swagger-ui`
 
-## How It Works
-
-1. **Voter Authentication**: Users must enter a valid Trinity College email address
-2. **Voting Options**:
-    - Select from existing candidates in a dropdown menu
-    - Type in a new candidate name to add them to the system
-3. **Vote Processing**: Each vote is recorded and candidate vote counts are updated
-4. **Candidate Pool**: New candidates are automatically added to the selection list for future voters
-
-## Technical Stack
-
-- **Backend**: Spring Boot 3.2.0
-- **Database**: H2 In-Memory Database
-- **Frontend**: Swagger UI
-- **Build Tool**: Maven
-- **Java Version**: 21
-- **Containerization**: Docker
-
-## Quick Start with Docker
-
-The easiest way to run this application is with Docker - no need to install Java or Maven!
-
-### Prerequisites
-- Docker
-- Git
-
-### Run the Application
+## Run Locally (no containers)
 ```bash
-   # Clone the repository
-   git clone https://github.com/shamshertamang/my-spring-container.git
-   cd my-spring-container
-
-   # Build and run with Docker
-   ./mvnw spring-boot:build-image
-   docker run --rm -p 8080:8080 my-spring-app:v1.0.0
+    # from spring-app/
+    ./mvnw clean spring-boot:run
+    
+    # or
+    mvn clean spring-boot:run
 ```
 
-### Access the Application
-Open your browser and navigate to: 
+Open Swagger:
 ```bash
-   http://localhost:8080/swagger-ui
+      http://localhost:8080/swagger-ui
 ```
 
-## Prerequisites (for developers)
+---
 
-- Java 21
-- Maven 3.6+ (or use the included Maven wrapper)
-- Git
+## API Overview
 
-## Developer Setup Instructions
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/candidates` | List candidates + vote counts |
+| POST | `/api/vote` | Create a vote `{voterEmail, candidateName}` |
+| PUT | `/api/vote` | Update a vote `{voterEmail, candidateName}` |
+| DELETE | `/api/vote/{email}` | Delete vote for email |
+| GET | `/api/votes/{email}` | Get vote by email (404 if none) |
 
-### 1. Clone the Repository
+Note: Email validation requires username@trincoll.edu (no extra dots before @).
+
+---
+
+## Build Jar
 
 ```bash
-   git clone https://github.com/shamshertamang/my-spring-container.git
-   cd myspringcontainer
+    ./mvnw clean package
+    # jar at target/*.jar
 ```
 
-### 2. Build the Project
-
-Using Maven wrapper (recommended):
+## Build & Push Container
 ```bash
-   ./mvnw clean compile
+    ./mvnw spring-boot:build-image
+    # retag and push
+    docker tag my-spring-app:v1.0.0 <your-dockerhub-username>/trinity-spring:1.0.0
+    docker push <your-dockerhub-username>/trinity-spring:1.0.0
 ```
 
-Or using system Maven:
+---
+
+## Run Container Locally
 ```bash
-   mvn clean compile
+    docker run --rm -p 8080:8080 <your-dockerhub-username>/trinity-spring:1.0.0
+    
+    # open http://localhost:8080/swagger-ui
 ```
 
-### 3. Run the Application
+---
 
-Using Maven wrapper:
+## Kubernetes (as part of the full stack)
+
+Applied from repo root or ```kubernetes/```:
 ```bash
-   ./mvnw spring-boot:run
+    kubectl apply -f kubernetes/spring-deployment.yaml
+    kubectl apply -f kubernetes/spring-service.yaml
 ```
 
-Or using system Maven:
+Service DNS in-cluster:
+
 ```bash
-   mvn spring-boot:run
+    http://spring-service:8080
 ```
 
-### 4. Containerize the application
-```bash
-   ./mvnw spring-boot:build-image
-   docker run --rm -p 8080:8080 my-spring-app:v1.0.0
-```
+The React app is configured to call ```spring-service:8080/api/...``` via NGINX.
 
-### 5. Access the Application
+---
 
-Open your web browser and navigate to:
-```bash
-   http://localhost:8080/swagger-ui
-```
+## Notes
 
-
-## Usage
-
-1. **Enter your Trinity College email** in the format: `yourname@trincoll.edu`
-2. **Choose your voting method**:
-    - Select an existing candidate from the dropdown menu, OR
-    - Enter a new candidate name in the text field
-3. **Submit your vote**
-4. **Confirmation**: You'll see a success message confirming your vote was recorded
-
-## Email Validation Rules
-
-The application enforces strict email validation:
-- Must use `username@trincoll.edu`
-
-**Valid Examples:**
-- `jsmith@trincoll.edu` ✅
-- `mary@trincoll.edu` ✅
-
-**Invalid Examples:**
-- `j.smith@trincoll.edu` ❌ (extra dot)
-- `john@gmail.com` ❌ (wrong domain)
-- `student@trincoll.edu.gov` ❌ (extra domain)
-
-## Project Structure
-
-```
-src/
-├── main/
-│   ├── java/com/javashams/springcontainer/
-│   │   ├── SpringContainerApplication.java     # Main application class
-│   │   ├── controller/VoteController.java      # REST API endpoints
-│   │   ├── service/VotingService.java          # Business logic
-│   │   ├── model/                              # Data models
-│   │   │   ├── Vote.java
-│   │   │   └── Candidate.java
-│   │   └── repository/                         # Database repositories
-│   │       ├── VoteRepository.java
-│   │       └── CandidateRepository.java
-│   └── resources/
-│       ├── static/                             # Frontend interface
-│       └── application.properties              # Application configuration
-```
-
-## API Endpoints
-
-- `GET /api/candidates` - Retrieve all candidates and their vote counts
-- `POST /api/vote` - Submit a new vote
-
-## Development Notes
-
-- The application uses an H2 in-memory database, so all data is reset when the application restarts
-- The application runs on port 8080/swagger-ui by default
-- **Java Version**: Build and tested with JDK21
-
-## License
-
-This project is created for educational purposes at Trinity College.
+- **State**: H2 is in-memory by default (reset on restart). Swap to Postgres/MySQL for persistence if needed.
+- **CORS**: Not required in-cluster; React talks to Spring via service DNS and the NGINX proxy.
+- **Logging**: Use kubectl logs on pods for debugging.

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: react
-          image: react-app:latest
+          image: shamdocks/react-frontend:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
