@@ -18,6 +18,20 @@ trinity-voting-app/
 └── react-service.yaml
 ```
 
+---
+
+## Prerequisites
+
+- **Docker Desktop** with Kubernetes enabled
+- **kubectl** in your PATH
+- **DockerHub account** (for `docker push`)
+- **Node.js 20+** (only if you want to run/build locally)
+- **Java 21 + Maven** (only if you want to run backend locally)
+
+> **Tip:** Make sure Docker Desktop shows "Kubernetes: Running".
+
+---
+
 ## Quick Run
 
 ```bash
@@ -61,16 +75,6 @@ trinity-voting-app/
 - Built with Vite; served by NGINX
 - Calls backend via `http://spring-service:8080/api/...`
 - Exposed via `react-service` (NodePort or port-forward)
-
-## Prerequisites
-
-- **Docker Desktop** with Kubernetes enabled
-- **kubectl** in your PATH
-- **DockerHub account** (for `docker push`)
-- **Node.js 20+** (only if you want to run/build locally)
-- **Java 21 + Maven** (only if you want to run backend locally)
-
-> **Tip:** Make sure Docker Desktop shows "Kubernetes: Running".
 
 ## Build & Push Images
 
@@ -129,7 +133,7 @@ From the repo root (or from kubernetes/):
 
 Verify:
 ```bash
-bashkubectl get all
+    kubectl get all
 ```
 
 You should see:
@@ -226,8 +230,10 @@ Place here as required:
 ## Brief Summary (for the writeup)
 - Challenges & fixes (examples you can tailor):
 
-  - NGINX proxy path → ensured /api/ proxied to spring-service:8080/api/
-  - Mixed service types → used NodePort for frontend; ClusterIP for backend
-  - CORS avoided by in-cluster DNS + reverse proxy
+  - Struggled with docker build for react and nginx.conf
+  - Mixed service types → used NodePort for frontend; ClusterIP for backend, had a hard time figuring out how to avoid port forwarding
+  - React was a tough ride because this is my first react application
+  - Getting the rest api connection to react and back to spring was tough too.
+  - Spring boot folder misnaming caused the build error, which was hard to figure out at first
 
-- **Use of AI tools**: Guidance on Dockerfile, NGINX proxy, K8s YAML patterns, and troubleshooting logs.
+- **Use of AI tools**: Guidance on Dockerfile, react docker build plus nginx conf, K8s YAML patterns, and figuring out port forwarding, also extensively used AI for frontend and spring boot.
