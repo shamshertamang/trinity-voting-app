@@ -218,8 +218,7 @@ In a debug pod: ```curl http://spring-service:8080/actuator/health``` (if actuat
 
 ---
 
-## Screenshots for Submission
-Place here as required:
+## Location for Screenshots for Submission
 
 ```bash
     screenshots/
