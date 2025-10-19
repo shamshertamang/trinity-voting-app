@@ -2,6 +2,20 @@
 
 This directory contains the **backend microservice** for the Trinity College Voting System. It exposes a REST API for managing candidates and votes. The React frontend (in `../react-app`) consumes these endpoints.
 
+---
+
+## Table of Contents
+- [Tech Stack](#tech-stack)
+- [Run Locally (no-containers)](#run-locally-no-containers)
+- [Build Jar](#build-jar)
+- [Build and Run Container (Local- No DockerHub)](#build-and-run-container-local--no-dockerhub)
+- [Build and Run Container (DockerHub)](#build-and-run-container-dockerhub)
+- [Kubernetes (as part of the full stack)](#kubernetes-as-part-of-the-full-stack)
+- [API Overview](#api-overview)
+- [Notes](#notes)
+
+---
+
 ## Tech Stack
 
 - **Spring Boot** (Java 21)
@@ -9,6 +23,8 @@ This directory contains the **backend microservice** for the Trinity College Vot
 - **Maven** build
 - **Docker** container
 - **Swagger UI** at `/swagger-ui`
+
+---
 
 ## Run Locally (no containers)
 ```bash
@@ -26,20 +42,6 @@ Open Swagger:
 
 ---
 
-## API Overview
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/candidates` | List candidates + vote counts |
-| POST | `/api/vote` | Create a vote `{voterEmail, candidateName}` |
-| PUT | `/api/vote` | Update a vote `{voterEmail, candidateName}` |
-| DELETE | `/api/vote/{email}` | Delete vote for email |
-| GET | `/api/votes/{email}` | Get vote by email (404 if none) |
-
-Note: Email validation requires username@trincoll.edu (no extra dots before @).
-
----
-
 ## Build Jar
 
 ```bash
@@ -47,7 +49,27 @@ Note: Email validation requires username@trincoll.edu (no extra dots before @).
     # jar at target/*.jar
 ```
 
-## Build & Push Container
+---
+
+## Build and Run Container (Local- No DockerHub)
+
+### Build Container
+```bash
+    ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=trinity-spring:local
+```
+
+---
+
+### Run Container
+```bash
+    docker run --rm -p 8080:8080 trinity-spring:local
+    
+    # open http://localhost:8080/swagger-ui
+```
+
+## Build and Run Container (DockerHub)
+
+### Build & Push Container
 ```bash
     ./mvnw spring-boot:build-image
     # retag and push
@@ -57,7 +79,7 @@ Note: Email validation requires username@trincoll.edu (no extra dots before @).
 
 ---
 
-## Run Container Locally
+### Run Container Locally
 ```bash
     docker run --rm -p 8080:8080 <your-dockerhub-username>/trinity-spring:1.0.0
     
@@ -81,6 +103,20 @@ Service DNS in-cluster:
 ```
 
 The React app is configured to call ```spring-service:8080/api/...``` via NGINX.
+
+---
+
+## API Overview
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/candidates` | List candidates + vote counts |
+| POST | `/api/vote` | Create a vote `{voterEmail, candidateName}` |
+| PUT | `/api/vote` | Update a vote `{voterEmail, candidateName}` |
+| DELETE | `/api/vote/{email}` | Delete vote for email |
+| GET | `/api/votes/{email}` | Get vote by email (404 if none) |
+
+Note: Email validation requires username@trincoll.edu (no extra dots before @).
 
 ---
 
