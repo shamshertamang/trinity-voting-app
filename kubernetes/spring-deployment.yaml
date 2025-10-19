@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
         - name: spring
-          image: shamdocks/trinity-spring:1.0.0    # <your-dockerhub-username>/trinity-spring:1.0.0
+          # image: <your-dockerhub-username>/trinity-spring:1.0.0    # dockerhub version, use your dockerhub name
+          # image: trinity-spring:local                       # no dockerhub version
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

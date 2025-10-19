@@ -2,6 +2,72 @@
 
 A two-service, containerized React + Spring Boot application deployed on Kubernetes (Docker Desktop). The React frontend talks to the Spring microservice via in-cluster service discovery.
 
+---
+
+## Table of Contents
+
+- [Trinity College Voting Application — Full Stack on Kubernetes](#trinity-college-voting-application--full-stack-on-kubernetes)
+  - [How To Use the Application](#how-to-use-the-application)
+  - [About the application](#about-the-application)
+    - [Architecture Overview](#architecture-overview)
+    - [Features](#features)
+  - [Repository Layout](#repository-layout)
+  - [Prerequisites](#prerequisites)
+  - [What You'll Deploy](#what-youll-deploy)
+  - [Project Set up](#project-set-up)
+  - [Raw Run (No Container, No Kubernetes)](#raw-run-no-container-no-kubernetes)
+  - [Run with Container Orchestration (No DockerHub)](#run-with-container-orchestration-no-dockerhub)
+  - [Run with Container Orchestration (using DockerHub)](#run-with-container-orchestration-using-dockerhub)
+  - [Deploy to Kubernetes, Run and Clean Up](#deploy-to-kubernetes-run-and-clean-up-2)
+  - [Test the Full Stack (CRUD)](#test-the-full-stack-crud)
+  - [Location for Screenshots of Submission](#location-for-screenshots-of-submission)
+
+
+---
+
+## How To Use the Application
+
+1. **Voter Authentication**: Users must enter a valid Trinity College email address
+2. **Voting Options**:
+    - Select from existing candidates in a dropdown menu
+    - Type in a new candidate name to add them to the system
+3. **Vote Processing**: Each vote is recorded and candidate vote counts are updated
+4. **Candidate Pool**: New candidates are automatically added to the selection list for future voters
+
+---
+
+## About the application
+
+### Architecture Overview
+
+This microservice is part of a three-tier Kubernetes-deployed system:
+
+| Layer | Technology                | Description |
+|-------|---------------------------|-------------|
+| Frontend | React + Vite  | User interface for students to cast, update, and delete votes. Communicates with the backend over RESTful APIs. |
+| Backend | Spring Boot (Java)        | Handles candidate and vote persistence, validation, and API endpoints. |
+| Database | H2 | Stores candidates and votes. |
+
+All components are containerized and deployed as independent Kubernetes pods. The frontend communicates with the backend via the ```spring-service``` Kubernetes service name (DNS).
+
+### Features
+
+- **Email validation** — ensures only ```username@trincoll.edu``` emails can vote.
+
+- **Vote management** — submit, update, or delete a vote tied to an email.
+
+- **Live results** — dynamically fetch and render current vote counts.
+
+- **Auto-detection** — detects if a user has already voted and displays editing/deletion options.
+
+- **Automatic reloads** — results refresh after any submission or deletion.
+
+- **Microservice isolation** — communicates via REST API proxied through NGINX to the backend.
+
+
+---
+
+
 ## Repository Layout
 
 ```
@@ -52,38 +118,6 @@ trinity-voting-app/
 
 ---
 
-## Quick Run
-
-```bash
-    # -1) setup keyboard shortcut
-    alias k=kubectl
-    
-    # 0) point k8s at docker desktop's cluster
-    k config get-contexts
-    k config use-context docker-desktop 
-    k cluster-info
-    
-    # Step 1) deploy spring boot and react
-    k apply -f kubernetes/spring-deployment.yaml
-    k apply -f kubernetes/react-deployment.yaml
-    k apply -f kubernetes/react-service.yaml   
-    k apply -f kubernetes/spring-service.yaml
-    
-    # Step 2) verify deployments and services are running
-    k get deployments      
-    k get services       
-    
-    # Step 3) Open the app at 
-    http://localhost:5173
-    
-    # Step 4) Clean up
-    k delete -f kubernetes/react-service.yaml
-    k delete -f kubernetes/react-deployment.yaml
-    k delete -f kubernetes/spring-service.yaml
-    k delete -f kubernetes/spring-deployment.yaml
-
-```
-
 ## What You'll Deploy
 
 ### Spring microservice (2 replicas)
@@ -96,95 +130,116 @@ trinity-voting-app/
 - Calls backend via `http://spring-service:8080/api/...`
 - Exposed via `react-service` (NodePort or port-forward)
 
-## Build & Push Images
+---
 
-You'll build two images: one for Spring, one for React.
+## Project Set up
 
-### 1) Spring image (backend)
-
-From `spring-app/`:
 ```bash
-    # build a container image via Spring Boot plugin
-    ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=<your-dockerhub-username>/trinity-spring:1.0.0
-    
-    # push to DockerHub
-    docker push <your-dockerhub-username>/trinity-spring:1.0.0
-```
-> If you used a different image name previously, update ```spring-deployment.yaml``` accordingly.
- 
-
-2) React image (frontend)
-From ```react-app/```:
-```bash
-    # production build
-    npm ci
-    npm run build
-
-
-    # build NGINX image
-    docker build -t <your-dockerhub-username>/trinity-react:1.0.0 .
-    
-    # push
-    docker push <your-dockerhub-username>/trinity-react:1.0.0
+   # Clone the repository
+   git clone https://github.com/shamshertamang/trinity-voting-app.git
+   cd trinity-voting-app
 ```
 
 ---
 
-## Configure Kubernetes Manifests (quick check)
+## Raw Run (No Container, No Kubernetes)
+
+To run without the container and the kubernetes: 
+
+### 1) Spring-App (Backend)
+
+Go to the `spring-app` and find `Run Locally (no-containers)` in the `Table of Contents` of the `README.md` file and follow the instructions. This will initialise the backend.
+
+### 2) React-App (Frontend)
+
+Go to the `react-app` and find `Local Development and Quick Run` in the `Table of Contents` of the `README.md` file and follow the instructions. This will start the frontend and the application has started.
+
+---
+
+## Run with Container Orchestration (No DockerHub)
+
+### 1) Raw Run
+
+If you haven't done a raw run, follow the instructions in the section `Raw Run` of this `README.md` to make sure everything is running smoothly.
+
+### 2) Spring-App (Backend) Image Creation
+
+Go to the `spring-app` and find `Build and Run Container (Local- No DockerHub)` in the `Table of Contents` of the `README.md` file and follow the instructions.
+
+### 3) React-App (Frontend) Image Creation
+
+Go to the `react-app` and find `Local Build (No DockerHub)` in the `Table of Contents` of the `README.md` file and follow the instructions.
+
+### 4) Configure Kubernetes Manifests
+
+Open files in ```kubernetes/``` and confirm the image fields match what you pushed:
+
+- ```spring-deployment.yaml``` → ```image: trinity-spring:local```
+- ```react-deployment.yaml``` → ```image: react-frontend:local```
+
+### 5) Deploy to Kubernetes, Run and Clean Up
+
+Follow the instructions in the `Deploy to Kubernetes, Run and Clean Up` section of this `README.md`.
+
+---
+
+## Run with Container Orchestration (using DockerHub)
+
+### 1) Raw Run
+
+If you haven't done a raw run, follow the instructions in the section `Raw Run` of this `README.md` to make sure everything is running smoothly.
+
+### 2) Spring-App (Backend) Image Creation
+
+Go to the `spring-app` and find `Build and Run Container (DockerHub)` in the `Table of Contents` of the `README.md` file and follow the instructions.
+
+### 3) React-App (Frontend) Image Creation
+
+Go to the `react-app` and find `Build (DockerHub)` in the `Table of Contents` of the `README.md` file and follow the instructions.
+
+### 4) Configure Kubernetes Manifests
+
 Open files in ```kubernetes/``` and confirm the image fields match what you pushed:
 
 - ```spring-deployment.yaml``` → ```image: <your-dockerhub-username>/trinity-spring:1.0.0```
 - ```react-deployment.yaml``` → ```image: <your-dockerhub-username>/trinity-react:1.0.0```
 
+### 5) Deploy to Kubernetes, Run and Clean Up
+
+Follow the instructions in the `Deploy to Kubernetes, Run and Clean Up` section of this `README.md`.
+
 ---
 
-## Deploy to Kubernetes
+## Deploy to Kubernetes, Run and Clean Up
 
-From the repo root (or from kubernetes/):
 ```bash
-    # Spring microservice
-    kubectl apply -f kubernetes/spring-deployment.yaml
-    kubectl apply -f kubernetes/spring-service.yaml
+    # -1) setup keyboard shortcut
+    alias k=kubectl
     
-    # React frontend
-    kubectl apply -f kubernetes/react-deployment.yaml
-    kubectl apply -f kubernetes/react-service.yaml
-```
-
-Verify:
-```bash
-    kubectl get all
-```
-
-You should see:
-
-- 2 Deployments (spring, react)
-- 2 ReplicaSets
-- 4 Pods total (2 spring + 2 react)
-- 2 Services (spring-service, react-service)
-
----
-
-## Access the App (two options)
-
-**Option A — NodePort** (preferred if react-service is NodePort)
-```bash
-  kubectl get service react-service
-```
-
-Look for a ```NODE-PORT``` (e.g., ```30080```). Open:
-```bash
-  http://localhost:<NODE-PORT>
-```
-
-**Option B — Port-forward** (works with ClusterIP too)
-```bash
-kubectl port-forward svc/react-service 5173:80
-```
-
-Open:
-```bash
-http://localhost:5173
+    # 0) point k8s at docker desktop's cluster
+    k config get-contexts
+    k config use-context docker-desktop 
+    k cluster-info
+    
+    # Step 1) deploy spring boot and react
+    # make sure deployment.yaml files have correct images for spring-boot and react   
+    k apply -f kubernetes/
+    
+    # Step 2) verify deployments and services are running
+    k get deployments      
+    k get services    
+    k get all  
+    # You should see:
+      # 2 Deployments (spring, react)
+      # 2 ReplicaSets
+      # 4 Pods total (2 spring + 2 react)
+      # 2 Services (spring-service, react-service) 
+    
+    # Step 3) Open the app at 
+    http://localhost:5173
+    
+    # Step 4) Clean up
+    k delete -f kubernetes/
 ```
 
 ---
@@ -207,38 +262,7 @@ then open ```http://localhost:8080/swagger-ui```.
 
 ---
 
-## Cleanup
-
-```bash
-kubectl delete -f kubernetes/react-service.yaml
-kubectl delete -f kubernetes/react-deployment.yaml
-kubectl delete -f kubernetes/spring-service.yaml
-kubectl delete -f kubernetes/spring-deployment.yaml
-```
-
----
-
-## Troubleshooting
-- **React shows network errors**
-
-Ensure React is calling ```http://spring-service:8080/api/...``` (handled by your NGINX config).
-Check service: ```kubectl get svc spring-service```.
-
-- **Pods CrashLoopBackOff**
-
-```kubectl logs <pod-name>``` and ```kubectl describe pod <pod-name>```.
-
-- Can't reach UI
-
-If ```react-service``` is ```ClusterIP```, use **port-forward** (above) or change it to **NodePort**.
-
-- Verify DNS
-
-In a debug pod: ```curl http://spring-service:8080/actuator/health``` (if actuator is present) or one of your ```/api/*``` endpoints.
-
----
-
-## Location for Screenshots for Submission
+## Location for Screenshots of Submission
 
 ```bash
     screenshots/

@@ -12,7 +12,6 @@ The frontend is built with **React + Vite**, styled with plain CSS, and served i
 - [Docker Build & Run](#docker-build--run)
     - [Local Build (No DockerHub)](#local-build-no-dockerhub)
     - [Build (DockerHub)](#build-dockerhub)
-- [Kubernetes Deployment](#kubernetes-deployment)
 - [API Integration](#api-integration)
 - [Project Structure](#project-structure)
 - [Environment Variables](#environment-variables)
