@@ -54,7 +54,10 @@ Open Swagger:
 
 ### Build Container
 ```bash
+    # On MacOS/Linux
     ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=trinity-spring:local
+    # On Windows
+    mvnw.cmd spring-boot:build-image -Dspring-boot.build-image.imageName=trinity-spring:local
 ```
 
 ---
@@ -70,7 +73,11 @@ Open Swagger:
 
 ### Build & Push Container
 ```bash
+    # MacOS/Linux
     ./mvnw spring-boot:build-image
+    # Windows
+    mvnw.cmd spring-boot:build-image
+    
     # retag and push
     docker tag my-spring-app:v1.0.0 <your-dockerhub-username>/trinity-spring:1.0.0
     docker push <your-dockerhub-username>/trinity-spring:1.0.0
