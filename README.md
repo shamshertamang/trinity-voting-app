@@ -9,13 +9,33 @@ trinity-voting-app/
 ├── README.md                 # (this file) end-to-end instructions
 ├── spring-app/               # Spring Boot microservice (REST CRUD + Swagger UI)
 │   └── README.md             # backend-only developer guide
+│   └── .mvn/wrapper
+│   └── src/                  # backend source code
+│   └── .gitattributes
+│   └── .gitignore            # untracked files in gitignore
+│   └── mvnw 
+│   └── mvnw.cmd              
+│   └── pom.xml               # dependency manager
 ├── react-app/                # React frontend microservice (Vite + NGINX)
 │   └── README.md             # frontend-only developer guide
+│   └── public/vite.svg
+│   └── src/                  # backend source code
+│   └── .dockerignore
+│   └── .gitignore            # untracked files in gitignore
+│   └── Dockerfile 
+│   └── eslint.config.js              
+│   └── index.html            
+│   └── nginx.conf
+│   └── package-lock.json              
+│   └── package.json            
+│   └── vite.config.js
 └── kubernetes/               # K8s manifests
-├── spring-deployment.yaml
-├── spring-service.yaml
-├── react-deployment.yaml
-└── react-service.yaml
+│   └── spring-deployment.yaml
+│   └── spring-service.yaml
+│   └── react-deployment.yaml
+│   └── react-service.yaml
+└── .gitignore
+└── screenshots
 ```
 
 ---
@@ -25,8 +45,8 @@ trinity-voting-app/
 - **Docker Desktop** with Kubernetes enabled
 - **kubectl** in your PATH
 - **DockerHub account** (for `docker push`)
-- **Node.js 20+** (only if you want to run/build locally)
-- **Java 21 + Maven** (only if you want to run backend locally)
+- **Node.js 20+**
+- **Java 21 + Maven**
 
 > **Tip:** Make sure Docker Desktop shows "Kubernetes: Running".
 
@@ -40,18 +60,18 @@ trinity-voting-app/
     
     # 0) point k8s at docker desktop's cluster
     k config get-contexts
-    kubectl config use-context docker-desktop 
+    k config use-context docker-desktop 
     k cluster-info
     
     # Step 1) deploy spring boot and react
-    kubectl apply -f kubernetes/spring-deployment.yaml
-    kubectl apply -f kubernetes/react-deployment.yaml
-    kubectl apply -f kubernetes/react-service.yaml   
-    kubectl apply -f kubernetes/spring-service.yaml
+    k apply -f kubernetes/spring-deployment.yaml
+    k apply -f kubernetes/react-deployment.yaml
+    k apply -f kubernetes/react-service.yaml   
+    k apply -f kubernetes/spring-service.yaml
     
     # Step 2) verify deployments and services are running
-    kubectl get deployments      
-    kubectl get services       
+    k get deployments      
+    k get services       
     
     # Step 3) Open the app at 
     http://localhost:5173
