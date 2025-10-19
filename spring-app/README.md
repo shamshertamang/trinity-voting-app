@@ -10,7 +10,6 @@ This directory contains the **backend microservice** for the Trinity College Vot
 - [Build Jar](#build-jar)
 - [Build and Run Container (Local- No DockerHub)](#build-and-run-container-local--no-dockerhub)
 - [Build and Run Container (DockerHub)](#build-and-run-container-dockerhub)
-- [Kubernetes (as part of the full stack)](#kubernetes-as-part-of-the-full-stack)
 - [API Overview](#api-overview)
 - [Notes](#notes)
 
@@ -85,24 +84,6 @@ Open Swagger:
     
     # open http://localhost:8080/swagger-ui
 ```
-
----
-
-## Kubernetes (as part of the full stack)
-
-Applied from repo root or ```kubernetes/```:
-```bash
-    kubectl apply -f kubernetes/spring-deployment.yaml
-    kubectl apply -f kubernetes/spring-service.yaml
-```
-
-Service DNS in-cluster:
-
-```bash
-    http://spring-service:8080
-```
-
-The React app is configured to call ```spring-service:8080/api/...``` via NGINX.
 
 ---
 

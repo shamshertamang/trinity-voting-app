@@ -7,37 +7,23 @@ The frontend is built with **React + Vite**, styled with plain CSS, and served i
 
 ---
 
-## Architecture Overview
+## Table of Contents
+- [Local Development and Quick Run](#local-development-and-quick-run)
+- [Docker Build & Run](#docker-build--run)
+    - [Local Build (No DockerHub)](#local-build-no-dockerhub)
+    - [Build (DockerHub)](#build-dockerhub)
+- [Kubernetes Deployment](#kubernetes-deployment)
+- [API Integration](#api-integration)
+- [Project Structure](#project-structure)
+- [Environment Variables](#environment-variables)
+- [UI Components](#ui-components)
+- [Developer Notes](#developer-notes)
+- [License](#license)
 
-This microservice is part of a three-tier Kubernetes-deployed system:
-
-| Layer | Technology                | Description |
-|-------|---------------------------|-------------|
-| Frontend | React + Vite (this repo)  | User interface for students to cast, update, and delete votes. Communicates with the backend over RESTful APIs. |
-| Backend | Spring Boot (Java)        | Handles candidate and vote persistence, validation, and API endpoints. |
-| Database | H2 | Stores candidates and votes. |
-
-All components are containerized and deployed as independent Kubernetes pods. The frontend communicates with the backend via the ```spring-service``` Kubernetes service name (DNS).
-
----
-
-## Features
-
-- **Email validation** — ensures only ```username@trincoll.edu``` emails can vote.
-
-- **Vote management** — submit, update, or delete a vote tied to an email.
-
-- **Live results** — dynamically fetch and render current vote counts.
-
-- **Auto-detection** — detects if a user has already voted and displays editing/deletion options.
-
-- **Automatic reloads** — results refresh after any submission or deletion.
-
-- **Microservice isolation** — communicates via REST API proxied through NGINX to the backend.
 
 ---
 
-## Local Development
+## Local Development and Quick Run
 
 1) Prerequisites
 
@@ -72,6 +58,62 @@ The proxy target is set in **vite.config.js**:
 ```bash
   const BACKEND = process.env.BACKEND || 'http://localhost:8080';
 ```
+
+---
+
+## Docker Build & Run
+
+The Dockerfile uses a **two-stage build** (Node build → NGINX serve):
+
+```
+# Build stage
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Serve stage
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+### Local Build (No DockerHub)
+Build and run locally:
+```bash
+    # Build the Docker container
+    docker build -t react-frontend:local .
+    
+    # Run the container
+    docker run --rm -p 3000:3000 react-frontend:local
+```
+
+Now visit
+```bash
+  http://localhost:5173
+```
+to see the UI served through NGINX.
+
+### Build (DockerHub)
+
+Build and run locally:
+```bash
+    # Build the Docker container
+    docker build -t <your-dockerhub-username>/react-frontend:1.0.0 .
+    
+    # Push to DockerHub
+    docker push <your-dockerhub-username>/react-frontend:1.0.0
+```
+
+Now visit 
+```bash
+  http://localhost:5173
+```
+to see the UI served through NGINX.
 
 ---
 
@@ -112,61 +154,6 @@ react-app/
 ├── package.json                  # Dependencies and scripts
 └── README.md                     # (this file)
 ```
-
----
-
-## Docker Build & Run
-
-The Dockerfile uses a **two-stage build** (Node build → NGINX serve):
-
-```
-# Build stage
-FROM node:20-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# Serve stage
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-Build and run locally:
-```bash
-    # Build the Docker container
-    docker build -t <your-dockerhub-username>/react-frontend:1.0.0 .
-    
-    # Push to DockerHub
-    docker push <your-dockerhub-username>/react-frontend:1.0.0
-```
-
-Now visit 
-```bash
-  http://localhost:5173
-```
-to see the UI served through NGINX.
-
----
-
-## Kubernetes Deployment
-
-When deployed to Kubernetes, the frontend runs as a pod served through a **ClusterIP service** (e.g., ```react-service```):
-
-```bash
-  kubectl get all
-```
-
-Example port-forward (for local access):
-```bash
-  kubectl port-forward svc/react-service 5173:80
-```
-
-This forwards your local ``` localhost:5173 ``` to the in-cluster port ```80``` of the React service.
 
 ---
 
