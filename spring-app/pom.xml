@@ -75,7 +75,9 @@
                 <version>3.5.6</version>
                 <configuration>
                     <image>
-                        <name>my-spring-app:v1.0.0</name>
+                        <!--<name>my-spring-app:v1.0.0</name>-->
+                        <name>${spring-boot.build-image.imageName}</name>>
+                        <builder>paketobuildpacks/builder-jammy-java-tiny:latest</builder>
                     </image>
                 </configuration>
             </plugin>

@@ -5,8 +5,10 @@ import com.javashams.springcontainer.model.Vote;
 import com.javashams.springcontainer.service.VotingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.MediaType;
 import java.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 @RestController
 @RequestMapping("/api")
@@ -85,5 +87,43 @@ public class VoteController {
         public void setVoterEmail(String voterEmail) { this.voterEmail = voterEmail; }
         public String getCandidateName() { return candidateName; }
         public void setCandidateName(String candidateName) { this.candidateName = candidateName; }
+    }
+
+    // configs and logs assignment part
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    @RequestMapping(value = "/config", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, String> getConfig() {
+        // Sorted for stable output (nice in UI/logs)
+        Map<String, String> env = new TreeMap<>(System.getenv());
+        try {
+            String json = MAPPER.writeValueAsString(env);
+            System.out.println(json); // <-- required: log the same JSON
+        } catch (Exception e) {
+            // Keep it simple; still return env
+            System.out.println("{\"configLogError\":\"" + e.getMessage() + "\"}");
+        }
+        return env;
+    }
+
+    @RequestMapping(value = "/fib", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String generateFibonacci(@RequestParam("length") int length) {
+        if (length <= 0) return "[]";
+        List<Long> seq = new ArrayList<>(length);
+        long a = 0, b = 1;
+        for (int i = 0; i < length; i++) {
+            seq.add(a);
+            long next = a + b;
+            a = b;
+            b = next;
+        }
+        try {
+            String json = MAPPER.writeValueAsString(seq);
+            System.out.println(json);
+            return json;
+        } catch (Exception e) {
+            System.out.println("[\"fibError: " + e.getMessage() + "\"]");
+            return "[]";
+        }
     }
 }

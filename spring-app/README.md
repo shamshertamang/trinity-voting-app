@@ -64,9 +64,12 @@ Open Swagger:
 
 ### Run Container
 ```bash
-    docker run --rm -p 8080:8080 trinity-spring:local
+    docker run --rm -p 80:8080 trinity-spring:local
     
-    # open http://localhost:8080/swagger-ui
+    docker run -d --name spring-service --network appnet -p 80:8080 trinity-spring:local
+
+    
+    # open http://localhost:80/swagger-ui
 ```
 
 ## Build and Run Container (DockerHub)
@@ -87,9 +90,9 @@ Open Swagger:
 
 ### Run Container Locally
 ```bash
-    docker run --rm -p 8080:8080 <your-dockerhub-username>/trinity-spring:1.0.0
+    docker run --rm -p 80:8080 <your-dockerhub-username>/trinity-spring:1.0.0
     
-    # open http://localhost:8080/swagger-ui
+    # open http://localhost:80/swagger-ui
 ```
 
 ---
