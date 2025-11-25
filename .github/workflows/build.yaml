@@ -1,0 +1,46 @@
+
+
+# Calls curl commands to verify that at least the microservice /fib request results are correct.
+
+name: Build and Test RESTful Service
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: go to spring app
+      run: cd spring-app
+
+    - name: Build the container image
+      run: ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=trinity-spring:local
+      
+    - name: Run the container
+      run: docker run -d --rm -p 80:8080 trinity-spring:local
+      
+    - name: Test the RESTful service
+      run: |
+        # Wait for the container to start up
+        sleep 10
+        
+        # Send a GET request to the service
+        response=$(curl -X 'GET' 'http://localhost:80/api/fib?length=10' -H 'accept: application/json')
+        
+        # Check that the response is "[0,1,1,2,3,5,8,13,21,34]"
+        if [ "$response" == "[0,1,1,2,3,5,8,13,21,34]" ]; then
+          echo "Test passed!"
+        else
+          echo "Test failed. Expected '[0,1,1,2,3,5,8,13,21,34]', got '$response'"
+          exit 1
+        fi
+
+
