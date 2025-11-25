@@ -1,5 +1,3 @@
-
-
 # Calls curl commands to verify that at least the microservice /fib request results are correct.
 
 name: Build and Test RESTful Service
@@ -24,10 +22,8 @@ jobs:
         distribution: 'temurin'
         java-version: '21'
 
-    - name: go to spring app
-      run: cd spring-app
-
     - name: Build the container image
+      working-directory: spring-app
       run: ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=trinity-spring:local
       
     - name: Run the container
